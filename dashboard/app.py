@@ -17,7 +17,7 @@ st.divider()
 if st.button("⚡ Predict Solar Power"):
     try:
         res = requests.get(
-            f"http://127.0.0.1:8000/predict?temp={temp}&hour={hour}"
+            f"https://solar-ai-project-v08o.onrender.com/predict?temp={temp}&hour={hour}"
         )
         result = res.json()
 
