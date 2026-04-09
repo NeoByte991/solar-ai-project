@@ -1,3 +1,4 @@
+import time
 import sys
 import os
 
@@ -22,64 +23,67 @@ st.caption("Real-time Solar Energy Prediction System")
 st.sidebar.header("Controls")
 city = st.sidebar.text_input("Enter City", "Shimoga")
 
-predict = st.sidebar.button("Run Prediction")
+predict = st.sidebar.button("⚡ Run Prediction")
 
 if predict:
-    try:
-        # 🔥 GET DATA DIRECTLY (NO REQUESTS)
-        hour = datetime.now().hour
+    with st.spinner("Fetching weather & predicting power... ⚡"):
+        try:
+            time.sleep(1)
 
-        temp, clouds = get_weather_by_city(city)
-        irradiation = estimate_irradiation(hour, clouds)
-        module_temp = temp + 5
+            hour = datetime.now().hour
 
-        power = predict_kaggle(irradiation, temp, module_temp, hour)
+            temp, clouds = get_weather_by_city(city)
+            irradiation = estimate_irradiation(hour, clouds)
+            module_temp = temp + 5
 
-        data = {
-            "temperature": temp,
-            "clouds": clouds,
-            "irradiation": irradiation,
-            "predicted_power": power
-        }
+            power = predict_kaggle(irradiation, temp, module_temp, hour)
 
-        st.success(f"Data loaded for {city}")
+            data = {
+                "temperature": temp,
+                "clouds": clouds,
+                "irradiation": irradiation,
+                "predicted_power": power
+            }
 
-        # 🔥 Top Metrics
-        col1, col2, col3, col4 = st.columns(4)
+            st.success(f"Data loaded for {city}")
 
-        col1.metric("🌡️ Temperature", f"{data['temperature']} °C")
-        col2.metric("☁️ Clouds", f"{data['clouds']} %")
-        col3.metric("☀️ Irradiation", data["irradiation"])
-        col4.metric("⚡ Power", round(data["predicted_power"], 2))
+            # 🔥 Top Metrics
+            col1, col2, col3, col4 = st.columns(4)
 
-        st.divider()
+            col1.metric("🌡️ Temperature", f"{data['temperature']} °C")
+            col2.metric("☁️ Clouds", f"{data['clouds']} %")
+            col3.metric("☀️ Irradiation", round(data["irradiation"], 2))
+            col4.metric("⚡ Power", round(data["predicted_power"], 2))
 
-        # 🔥 Dashboard Layout
-        left, right = st.columns([2, 1])
+            st.divider()
 
-        with left:
-            st.subheader("📊 Power Analysis")
+            # 🔥 Dashboard Layout
+            left, right = st.columns([2, 1])
 
-            # Simulated graph
-            hours = list(range(6, 19))
-            power_values = [data["predicted_power"] * (i/12) for i in range(len(hours))]
+            with left:
+                st.subheader("📊 Power Analysis")
 
-            st.line_chart(power_values)
+                hours = list(range(6, 19))
+                power_values = [data["predicted_power"] * (i/12) for i in range(len(hours))]
 
-        with right:
-            st.subheader("⚡ Status")
+                st.line_chart(power_values)
 
-            if data["predicted_power"] == 0:
-                st.error("No Generation (Night / Low Sunlight)")
-            else:
-                st.success("Generating Power")
+            with right:
+                st.subheader("⚡ Status")
 
-            st.progress(min(int(data["predicted_power"]), 100))
+                if data["predicted_power"] == 0:
+                    st.error("No Generation (Night / Low Sunlight)")
+                else:
+                    st.success("Generating Power")
 
-        st.divider()
+                st.progress(min(int(data["predicted_power"]), 100))
 
-        st.subheader("📋 Raw Data")
-        st.json(data)
+            st.divider()
 
-    except Exception as e:
-        st.error(f"Error: {e}")
+            st.subheader("📋 Raw Data")
+            st.json(data)
+
+            st.toast("Prediction complete ⚡")
+
+        except Exception as e:
+            st.error(f"Error: {e}")
