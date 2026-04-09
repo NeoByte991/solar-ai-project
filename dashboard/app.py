@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import streamlit as st
 from datetime import datetime
 
-# 🔥 IMPORT YOUR LOGIC DIRECTLY (NO API CALLS)
+# 🔥 IMPORT YOUR LOGIC DIRECTLY
 from src.weather import get_weather_by_city
 from src.predict import predict_kaggle
 from src.irradiance import estimate_irradiation
@@ -21,7 +21,7 @@ st.set_page_config(page_title="Solar AI Dashboard", layout="wide")
 st.title("⚡ Solar Power AI Dashboard")
 st.caption("Real-time Solar Energy Prediction System")
 
-# 🔹 Sidebar input
+# 🔹 Sidebar
 st.sidebar.header("Controls")
 city = st.sidebar.text_input("Enter City", "Shimoga")
 
@@ -49,7 +49,7 @@ if predict:
 
             st.success(f"Data loaded for {city}")
 
-            # 🔥 Top Metrics
+            # 🔥 Metrics
             col1, col2, col3, col4 = st.columns(4)
 
             col1.metric("🌡️ Temperature", f"{data['temperature']} °C")
@@ -59,22 +59,29 @@ if predict:
 
             st.divider()
 
-            # 🔥 Dashboard Layout
+            # 🔥 Layout
             left, right = st.columns([2, 1])
 
             with left:
                 st.subheader("📊 Power Analysis")
 
-                hours = list(range(6, 19))  # 6 AM to 6 PM
+                # 🔥 Dynamic sunrise & sunset (approx)
+                sunrise = 6
+                sunset = 18
+
+                hours = list(range(sunrise, sunset + 1))
                 power_values = []
 
                 for h in hours:
-                    angle = (h - 6) / 12 * math.pi
+                    # normalize between sunrise and sunset
+                    angle = (h - sunrise) / (sunset - sunrise) * math.pi
                     base_power = math.sin(angle)
 
+                    # 🔥 improved cloud impact (not too harsh)
                     cloud_factor = (100 - data["clouds"]) / 100
+                    adjusted_cloud = 0.5 + (cloud_factor / 2)
 
-                    value = base_power * data["predicted_power"] * cloud_factor
+                    value = base_power * data["predicted_power"] * adjusted_cloud
                     power_values.append(max(value, 0))
 
                 df = pd.DataFrame({
@@ -83,6 +90,9 @@ if predict:
                 }).set_index("Hour")
 
                 st.line_chart(df)
+
+                # 🔥 Show sunrise/sunset info
+                st.caption(f"🌅 Sunrise: {sunrise}:00   |   🌇 Sunset: {sunset}:00")
 
             with right:
                 st.subheader("⚡ Status")
