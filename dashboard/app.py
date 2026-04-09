@@ -15,15 +15,15 @@ from src.weather import get_weather_by_city
 from src.predict import predict_kaggle
 from src.irradiance import estimate_irradiation
 
-st.set_page_config(page_title="Solar AI Dashboard", layout="wide")
+st.set_page_config(page_title="Helios", layout="wide")
 
 # 🔥 Header
-st.title("⚡HELIOS")
-st.caption("Real-time Solar Energy Prediction System")
+st.title("⚡ Helios")
+st.caption("AI-Based Solar Power Prediction System")
 
 # 🔹 Sidebar
 st.sidebar.header("Controls")
-city = st.sidebar.text_input("Enter City", "Shimoga")
+city = st.sidebar.text_input("Enter City", "Shimoga").strip().title()
 
 predict = st.sidebar.button("⚡ Run Prediction")
 
@@ -47,7 +47,7 @@ if predict:
                 "predicted_power": power
             }
 
-            st.success(f"Data loaded for {city}")
+            st.success(f"Live data for {city}")
 
             # 🔥 Metrics
             col1, col2, col3, col4 = st.columns(4)
@@ -65,7 +65,6 @@ if predict:
             with left:
                 st.subheader("📊 Power Analysis")
 
-                # 🔥 Dynamic sunrise & sunset (approx)
                 sunrise = 6
                 sunset = 18
 
@@ -73,11 +72,9 @@ if predict:
                 power_values = []
 
                 for h in hours:
-                    # normalize between sunrise and sunset
                     angle = (h - sunrise) / (sunset - sunrise) * math.pi
                     base_power = math.sin(angle)
 
-                    # 🔥 improved cloud impact (not too harsh)
                     cloud_factor = (100 - data["clouds"]) / 100
                     adjusted_cloud = 0.5 + (cloud_factor / 2)
 
@@ -91,7 +88,6 @@ if predict:
 
                 st.line_chart(df)
 
-                # 🔥 Show sunrise/sunset info
                 st.caption(f"🌅 Sunrise: {sunrise}:00   |   🌇 Sunset: {sunset}:00")
 
             with right:
@@ -113,3 +109,7 @@ if predict:
 
         except Exception as e:
             st.error(f"Error: {e}")
+
+# 🔥 Footer (clean finish)
+st.markdown("---")
+st.caption("Developed by Batch 6 • Helios AI System")
