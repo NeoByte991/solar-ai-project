@@ -1,10 +1,17 @@
 import joblib
-import pandas as pd
+import pandas as pd   # ✅ ADD THIS
 
-def load_model():
-    return joblib.load("model/model.pkl")
+model = joblib.load("model/kaggle_model.pkl")
 
-def predict(temp, hour):
-    model = load_model()
-    X = pd.DataFrame([[temp, hour]], columns=["T2M", "hour"])
+def predict_kaggle(irradiation, temp, module_temp, hour):
+
+    # 🌙 Night check
+    if hour < 6 or hour > 18:
+        return 0
+
+    X = pd.DataFrame(
+        [[irradiation, temp, module_temp, hour]],
+        columns=["IRRADIATION", "AMBIENT_TEMPERATURE", "MODULE_TEMPERATURE", "hour"]
+    )
+
     return model.predict(X)[0]
