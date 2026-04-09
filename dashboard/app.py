@@ -18,7 +18,7 @@ from src.irradiance import estimate_irradiation
 st.set_page_config(page_title="Solar AI Dashboard", layout="wide")
 
 # 🔥 Header
-st.title("⚡ Solar Power AI Dashboard")
+st.title("⚡HELIOS")
 st.caption("Real-time Solar Energy Prediction System")
 
 # 🔹 Sidebar
