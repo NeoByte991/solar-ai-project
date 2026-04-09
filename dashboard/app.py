@@ -1,6 +1,8 @@
 import time
 import sys
 import os
+import math
+import pandas as pd
 
 # 🔥 FIX: allow Streamlit Cloud to find src folder
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -63,10 +65,24 @@ if predict:
             with left:
                 st.subheader("📊 Power Analysis")
 
-                hours = list(range(6, 19))
-                power_values = [data["predicted_power"] * (i/12) for i in range(len(hours))]
+                hours = list(range(6, 19))  # 6 AM to 6 PM
+                power_values = []
 
-                st.line_chart(power_values)
+                for h in hours:
+                    angle = (h - 6) / 12 * math.pi
+                    base_power = math.sin(angle)
+
+                    cloud_factor = (100 - data["clouds"]) / 100
+
+                    value = base_power * data["predicted_power"] * cloud_factor
+                    power_values.append(max(value, 0))
+
+                df = pd.DataFrame({
+                    "Hour": hours,
+                    "Power": power_values
+                }).set_index("Hour")
+
+                st.line_chart(df)
 
             with right:
                 st.subheader("⚡ Status")
