@@ -60,3 +60,34 @@ It combines multiple data sources with a trained model to provide accurate and e
 ## How to Run
 
 ### Install dependencies
+
+pip install -r requirements.txt
+
+### Run the application
+
+streamlit run dashboard/app.py
+
+---
+
+## Output
+
+- Temperature  
+- Cloud coverage  
+- Wind speed  
+- Solar irradiation (raw and adjusted)  
+- Predicted solar power  
+- Power trend graph  
+- Feature importance chart  
+
+---
+
+## Notes
+
+- Large datasets (ERA5, NASA CSV) are not included due to size limitations  
+- The model is trained using a Kaggle solar plant dataset  
+
+---
+
+## Author
+
+Helios Project • Batch 6
