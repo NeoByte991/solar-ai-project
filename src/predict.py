@@ -1,12 +1,13 @@
 import joblib
-import pandas as pd   # ✅ ADD THIS
+import pandas as pd
 
 model = joblib.load("model/kaggle_model.pkl")
 
-def predict_kaggle(irradiation, temp, module_temp, hour):
 
-    # 🌙 Night check
-    if hour < 6 or hour > 18:
+def predict_kaggle(irradiation, temp, module_temp, hour, sunrise_hour, sunset_hour):
+
+    # 🌙 Real night check (dynamic)
+    if hour < sunrise_hour or hour > sunset_hour:
         return 0
 
     X = pd.DataFrame(
@@ -15,3 +16,9 @@ def predict_kaggle(irradiation, temp, module_temp, hour):
     )
 
     return model.predict(X)[0]
+
+
+def get_feature_importance():
+    features = ["Irradiance", "Temperature", "Module Temp", "Hour"]
+    importance = model.feature_importances_
+    return features, importance
