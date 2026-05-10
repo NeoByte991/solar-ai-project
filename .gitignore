@@ -4,3 +4,5 @@ __pycache__/
 data/
 *.nc
 *.csv
+.env
+*.log

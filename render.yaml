@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: helios-solar-forecast
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python -m scripts.smoke_check
+    startCommand: streamlit run app.py --server.address 0.0.0.0 --server.port $PORT
+    envVars:
+      - key: DEFAULT_CITY
+        value: Shimoga
+      - key: SOLAR_MODEL_PATH
+        value: model/solar_forecast_model.pkl
+      - key: NOMINATIM_USER_AGENT
+        value: Helios Solar Forecast
+      - key: REQUEST_TIMEOUT_SECONDS
+        value: "20"

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from src.predict import predict_kaggle
+from src.forecast import get_open_meteo_forecast
+from src.predict import predict_forecast_frame, predict_kaggle
 from src.weather import get_weather_by_city
 from src.irradiance import estimate_irradiation
 from datetime import datetime
@@ -17,9 +18,11 @@ def predict_power(
     irradiation: float,
     temp: float,
     module_temp: float,
-    hour: int
+    hour: int,
+    sunrise_hour: int = 6,
+    sunset_hour: int = 18,
 ):
-    value = predict_kaggle(irradiation, temp, module_temp, hour)
+    value = predict_kaggle(irradiation, temp, module_temp, hour, sunrise_hour, sunset_hour)
     return {"predicted_power": value}
 
 
@@ -34,7 +37,7 @@ def predict_city(city: str):
 
         module_temp = temp + 5
 
-        value = predict_kaggle(irradiation, temp, module_temp, hour)
+        value = predict_kaggle(irradiation, temp, module_temp, hour, 6, 18)
 
         return {
             "city": city,
@@ -44,5 +47,27 @@ def predict_city(city: str):
             "predicted_power": value
         }
 
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.get("/forecast")
+def forecast(lat: float, lon: float, capacity: float = 3500, days: int = 2):
+    try:
+        frame = get_open_meteo_forecast(lat, lon, days=days)
+        prediction = predict_forecast_frame(frame, max_capacity=capacity)
+        prediction = prediction.copy()
+        prediction["timestamp"] = prediction["timestamp"].astype(str)
+        return prediction[
+            [
+                "timestamp",
+                "predicted_power",
+                "IRRADIATION",
+                "AMBIENT_TEMPERATURE",
+                "HUMIDITY",
+                "CLOUD_COVER",
+                "WIND_SPEED",
+            ]
+        ].to_dict(orient="records")
     except Exception as e:
         return {"error": str(e)}

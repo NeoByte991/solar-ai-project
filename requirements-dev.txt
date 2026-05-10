@@ -1,0 +1,5 @@
+-r requirements.txt
+xarray>=2024.1
+netcdf4>=1.6
+fastapi>=0.110
+uvicorn[standard]>=0.27

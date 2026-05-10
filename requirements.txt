@@ -1,8 +1,7 @@
-streamlit
-requests
-pandas
-numpy
-scikit-learn
-joblib
-altair
-astral
+streamlit>=1.55,<2
+requests>=2.33,<3
+pandas>=2.3,<3
+numpy>=2.4,<3
+scikit-learn>=1.8,<1.9
+joblib>=1.5,<2
+altair>=6,<7
