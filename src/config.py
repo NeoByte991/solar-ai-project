@@ -10,3 +10,4 @@ LEGACY_SOLAR_MODEL_PATH = os.getenv("LEGACY_SOLAR_MODEL_PATH", "model/kaggle_mod
 
 FORECAST_API_URL = os.getenv("FORECAST_API_URL", "https://api.open-meteo.com/v1/forecast")
 REQUEST_TIMEOUT_SECONDS = int(os.getenv("REQUEST_TIMEOUT_SECONDS", "20"))
+CACHE_TTL_SECONDS = int(os.getenv("CACHE_TTL_SECONDS", "300"))  # 5 minutes default

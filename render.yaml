@@ -14,3 +14,5 @@ services:
         value: Helios Solar Forecast
       - key: REQUEST_TIMEOUT_SECONDS
         value: "20"
+      - key: CACHE_TTL_SECONDS
+        value: "1800"

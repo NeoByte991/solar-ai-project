@@ -8,7 +8,7 @@ import streamlit as st
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.config import DEFAULT_CITY, NOMINATIM_USER_AGENT
+from src.config import DEFAULT_CITY, NOMINATIM_USER_AGENT, CACHE_TTL_SECONDS
 from src.forecast import get_open_meteo_forecast
 from src.predict import (
     get_forecast_feature_importance,
@@ -40,13 +40,13 @@ def get_lat_lon(city):
     return float(data[0]["lat"]), float(data[0]["lon"]), data[0].get("display_name", city)
 
 
-@st.cache_data(ttl=30 * 60)
+@st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_forecast(lat, lon, days):
     forecast = get_open_meteo_forecast(lat, lon, days=days)
     return predict_forecast_frame(forecast)
 
 
-@st.cache_data(ttl=60 * 60)
+@st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_historical_comparison():
     try:
         history = build_training_frame().copy()
@@ -218,6 +218,8 @@ with st.sidebar:
 
 if refresh:
     st.cache_data.clear()
+
+st.caption(f"Data is cached for {CACHE_TTL_SECONDS // 60} minutes. Use 'Refresh forecast' to update immediately.")
 
 try:
     lat, lon, display_name = get_lat_lon(city)
