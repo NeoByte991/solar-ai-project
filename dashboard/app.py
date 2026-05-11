@@ -46,6 +46,23 @@ def load_forecast(lat, lon, days):
     return predict_forecast_frame(forecast)
 
 
+def safe_load_forecast(lat, lon, days):
+    try:
+        return load_forecast(lat, lon, days)
+    except Exception as exc:
+        st.error("Unable to load forecast data. Please refresh or try again later.")
+        st.error(str(exc))
+        return pd.DataFrame(columns=[
+            "timestamp",
+            "predicted_power",
+            "IRRADIATION",
+            "AMBIENT_TEMPERATURE",
+            "HUMIDITY",
+            "CLOUD_COVER",
+            "WIND_SPEED",
+        ])
+
+
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_recent_historical():
     try:
@@ -239,7 +256,10 @@ st.caption(f"Data is cached for {CACHE_TTL_SECONDS // 60} minutes. Use 'Refresh 
 
 try:
     lat, lon, display_name = get_lat_lon(city)
-    forecast_df = load_forecast(lat, lon, forecast_days)
+    forecast_df = safe_load_forecast(lat, lon, forecast_days)
+    if forecast_df.empty:
+        st.stop()
+
     metrics = get_forecast_model_metrics()
 
     current = forecast_df.iloc[0]
