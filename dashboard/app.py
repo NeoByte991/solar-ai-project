@@ -286,15 +286,18 @@ try:
         recent_history = load_recent_historical()
         if not recent_history.empty:
             # Combine historical and forecast
-            forecast_with_past = pd.DataFrame({
-                "timestamp": recent_history["timestamp"],
-                "power": recent_history["actual_power"],
-                "type": "Actual"
-            }).append(pd.DataFrame({
-                "timestamp": forecast_df["timestamp"],
-                "power": forecast_df["predicted_power"],
-                "type": "Predicted"
-            }), ignore_index=True)
+            forecast_with_past = pd.concat([
+                pd.DataFrame({
+                    "timestamp": recent_history["timestamp"],
+                    "power": recent_history["actual_power"],
+                    "type": "Actual"
+                }),
+                pd.DataFrame({
+                    "timestamp": forecast_df["timestamp"],
+                    "power": forecast_df["predicted_power"],
+                    "type": "Predicted"
+                })
+            ], ignore_index=True)
             
             # Sort by timestamp
             forecast_with_past = forecast_with_past.sort_values("timestamp")
