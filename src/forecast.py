@@ -50,6 +50,9 @@ def get_open_meteo_forecast(lat, lon, days=2):
         }
     )
 
+    # Make timestamp naive to match historical data
+    df["timestamp"] = df["timestamp"].dt.tz_localize(None)
+
     # The training dataset uses irradiation as energy over a sampling period.
     # Open-Meteo provides W/m2 for the hour, so kWh/m2 is a closer model input.
     df["IRRADIATION"] = df["SHORTWAVE_RADIATION"].clip(lower=0) / 1000
