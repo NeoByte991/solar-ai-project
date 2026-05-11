@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 import requests
@@ -61,6 +61,7 @@ def get_open_meteo_forecast(lat, lon, days=2):
     df["month"] = df["timestamp"].dt.month
     df = add_solar_features(df)
 
-    now = datetime.now()
+    utc_offset = int(payload.get("utc_offset_seconds", 0))
+    now = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(seconds=utc_offset)
     horizon_hours = days * 24
     return df[df["timestamp"] >= now].head(horizon_hours).reset_index(drop=True)
