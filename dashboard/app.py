@@ -1,12 +1,12 @@
 import os
 import sys
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import altair as alt
 import pandas as pd
 import requests
 import streamlit as st
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.config import DEFAULT_CITY, NOMINATIM_USER_AGENT, CACHE_TTL_SECONDS
 from src.forecast import get_open_meteo_forecast
