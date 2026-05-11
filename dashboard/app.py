@@ -47,7 +47,19 @@ def load_forecast(lat, lon, days):
 
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
-def load_historical_comparison():
+def load_recent_historical():
+    try:
+        history = build_training_frame().copy()
+    except Exception:
+        return pd.DataFrame(columns=["timestamp", "AC_POWER"])
+
+    # Get last 24 hours
+    end_time = pd.Timestamp.now(tz='UTC')
+    start_time = end_time - pd.Timedelta(hours=24)
+    recent = history[(history["DATE_TIME"] >= start_time) & (history["DATE_TIME"] <= end_time)].copy()
+    recent = recent.rename(columns={"DATE_TIME": "timestamp", "AC_POWER": "actual_power"})
+    recent = recent[["timestamp", "actual_power"]]
+    return recent
     try:
         history = build_training_frame().copy()
     except Exception:
@@ -269,6 +281,28 @@ try:
     with tab_forecast:
         st.subheader("Hourly prediction")
         st.caption("Simple hourly view of expected solar power output.")
+
+        # Load recent historical data
+        recent_history = load_recent_historical()
+        if not recent_history.empty:
+            # Combine historical and forecast
+            forecast_with_past = pd.DataFrame({
+                "timestamp": recent_history["timestamp"],
+                "power": recent_history["actual_power"],
+                "type": "Actual"
+            }).append(pd.DataFrame({
+                "timestamp": forecast_df["timestamp"],
+                "power": forecast_df["predicted_power"],
+                "type": "Predicted"
+            }), ignore_index=True)
+            
+            # Sort by timestamp
+            forecast_with_past = forecast_with_past.sort_values("timestamp")
+            
+            # Chart
+            chart = line_chart(forecast_with_past, "power", color="type")
+            st.altair_chart(chart, width="stretch")
+
         simple_forecast = format_simple_forecast_table(forecast_df)
         st.dataframe(simple_forecast, width="stretch", hide_index=True)
 
