@@ -40,6 +40,15 @@ def get_lat_lon(city):
     return float(data[0]["lat"]), float(data[0]["lon"]), data[0].get("display_name", city)
 
 
+def safe_get_lat_lon(city):
+    try:
+        return get_lat_lon(city)
+    except Exception as exc:
+        st.error(f"Unable to find location for '{city}': {exc}")
+        st.error("Please check the city name and try again.")
+        return None, None, city
+
+
 @st.cache_data(ttl=CACHE_TTL_SECONDS)
 def load_forecast(lat, lon, days):
     forecast = get_open_meteo_forecast(lat, lon, days=days)
@@ -255,12 +264,19 @@ if refresh:
 st.caption(f"Data is cached for {CACHE_TTL_SECONDS // 60} minutes. Use 'Refresh forecast' to update immediately.")
 
 try:
-    lat, lon, display_name = get_lat_lon(city)
+    lat, lon, display_name = safe_get_lat_lon(city)
+    if lat is None:
+        st.stop()
+
     forecast_df = safe_load_forecast(lat, lon, forecast_days)
     if forecast_df.empty:
         st.stop()
 
-    metrics = get_forecast_model_metrics()
+    try:
+        metrics = get_forecast_model_metrics()
+    except Exception as exc:
+        st.error(f"Unable to load model metrics: {exc}")
+        metrics = {"rows": 0, "mae": 0, "r2": 0, "daylight_mae": None, "peak_mae": None, "trained_at": "unknown", "training_start": "unknown", "training_end": "unknown", "model_type": "Unknown"}
 
     current = forecast_df.iloc[0]
     daylight = forecast_df[forecast_df["IRRADIATION"] > 0.01]
@@ -410,7 +426,11 @@ try:
             f"Training window: {training_start} to {training_end} | Trained: {trained_at}"
         )
 
-        features, importance = get_forecast_feature_importance()
+        try:
+            features, importance = get_forecast_feature_importance()
+        except Exception:
+            features, importance = [], []
+
         if len(features):
             fi_df = pd.DataFrame(
                 {
