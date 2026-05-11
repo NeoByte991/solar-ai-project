@@ -54,7 +54,7 @@ def load_recent_historical():
         return pd.DataFrame(columns=["timestamp", "AC_POWER"])
 
     # Get last 24 hours
-    end_time = pd.Timestamp.now(tz='UTC')
+    end_time = pd.Timestamp.now()
     start_time = end_time - pd.Timedelta(hours=24)
     recent = history[(history["DATE_TIME"] >= start_time) & (history["DATE_TIME"] <= end_time)].copy()
     recent = recent.rename(columns={"DATE_TIME": "timestamp", "AC_POWER": "actual_power"})
