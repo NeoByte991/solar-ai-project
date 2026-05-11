@@ -60,6 +60,10 @@ def load_recent_historical():
     recent = recent.rename(columns={"DATE_TIME": "timestamp", "AC_POWER": "actual_power"})
     recent = recent[["timestamp", "actual_power"]]
     return recent
+
+
+@st.cache_data(ttl=CACHE_TTL_SECONDS)
+def load_historical_comparison():
     try:
         history = build_training_frame().copy()
     except Exception:
